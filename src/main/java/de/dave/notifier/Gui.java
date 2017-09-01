@@ -76,9 +76,7 @@ public class Gui extends Application {
 		textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
 		startButton = new Button(BUTTON_START);
 		startButton.setMinWidth(50);
-		startButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
+		startButton.setOnAction((ActionEvent e) -> {
 				isRunning = !isRunning;
 				if (isRunning) {
 					url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
@@ -108,14 +106,12 @@ public class Gui extends Application {
 					currentBuildNumber = getBuildNumber(result);
 					statusText.setMessage("Current build found " + currentBuildNumber);
 				}
-			}
-		});
+			});
 
 		Timeline gameLoop = new Timeline();
 		gameLoop.setCycleCount(Timeline.INDEFINITE);
 
-		KeyFrame kf = new KeyFrame(Duration.seconds(10), new EventHandler<ActionEvent>() {
-			public void handle(ActionEvent ae) {
+		KeyFrame kf = new KeyFrame(Duration.seconds(10), (ActionEvent ae) -> {
 				if (isRunning) {
 					JSONObject result = getResult();
 					int buildNumber = getBuildNumber(result);
@@ -140,8 +136,7 @@ public class Gui extends Application {
 						statusText.appendWait();
 					}
 				}
-			}
-		});
+			});
 
 		gameLoop.getKeyFrames().add(kf);
 		gameLoop.play();
@@ -161,13 +156,8 @@ public class Gui extends Application {
 		theStage.getIcons().add(new Image(getClass().getResourceAsStream("/jenkins_icon.jpg")));
 		theStage.setScene(new Scene(borderPane));
 		theStage.setTitle("jenkins-notifier");
-		theStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent t) {
-				Platform.exit();
-				System.exit(0);
-			}
-		});
+
+		theStage.setOnCloseRequest((WindowEvent t) -> {Platform.exit(); System.exit(0);});
 		theStage.show();
 	}
 

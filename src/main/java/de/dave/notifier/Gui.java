@@ -42,10 +42,6 @@ public class Gui extends Application {
 
 	private static final String BUTTON_START = "Start";
 
-	private TextField textField_url;
-	private TextField textField_username;
-	private TextField textField_token;
-	private Button startButton;
 	private StatusText statusText;
 
 	private String url;
@@ -70,11 +66,11 @@ public class Gui extends Application {
 		borderPane.setTop(grid);
 		statusText = new StatusText("Welcome to jenkins-notifier");
 		Properties properties = PropertiesManager.getProperties();
-		textField_url = new TextField(properties.getProperty(PropertiesManager.URL));
+		TextField textField_url = new TextField(properties.getProperty(PropertiesManager.URL));
 		textField_url.setMinWidth(300);
-		textField_username = new TextField(properties.getProperty(PropertiesManager.USERNAME));
-		textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
-		startButton = new Button(BUTTON_START);
+		TextField textField_username = new TextField(properties.getProperty(PropertiesManager.USERNAME));
+		TextField textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
+		Button startButton = new Button(BUTTON_START);
 		startButton.setMinWidth(50);
 		startButton.setOnAction((ActionEvent e) -> {
 				isRunning = !isRunning;

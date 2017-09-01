@@ -73,66 +73,66 @@ public class Gui extends Application {
 		Button startButton = new Button(BUTTON_START);
 		startButton.setMinWidth(50);
 		startButton.setOnAction((ActionEvent e) -> {
-				isRunning = !isRunning;
-				if (isRunning) {
-					url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
-					userName = textField_username.getText();
-					token = textField_token.getText();
-					
-					PropertiesManager.writeProperties(url, userName, token);
+			isRunning = !isRunning;
+			if (isRunning) {
+				url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
+				userName = textField_username.getText();
+				token = textField_token.getText();
 
-					textField_url.setEditable(false);
-					textField_username.setEditable(false);
-					textField_token.setEditable(false);
-					startButton.setText("Stop");
-				} else {
-					textField_url.setEditable(true);
-					textField_username.setEditable(true);
-					textField_token.setEditable(true);
-					statusText.setMessage("jenkins-notifier stopped");
-					startButton.setText(BUTTON_START);
-					return;
-				}
+				PropertiesManager.writeProperties(url, userName, token);
 
-				JSONObject result = getResult();
-				if (result == null) {
-					isRunning = false;
-					startButton.setText(BUTTON_START);
-				} else {
-					currentBuildNumber = getBuildNumber(result);
-					statusText.setMessage("Current build found " + currentBuildNumber);
-				}
-			});
+				textField_url.setEditable(false);
+				textField_username.setEditable(false);
+				textField_token.setEditable(false);
+				startButton.setText("Stop");
+			} else {
+				textField_url.setEditable(true);
+				textField_username.setEditable(true);
+				textField_token.setEditable(true);
+				statusText.setMessage("jenkins-notifier stopped");
+				startButton.setText(BUTTON_START);
+				return;
+			}
+
+			JSONObject result = getResult();
+			if (result == null) {
+				isRunning = false;
+				startButton.setText(BUTTON_START);
+			} else {
+				currentBuildNumber = getBuildNumber(result);
+				statusText.setMessage("Current build found " + currentBuildNumber);
+			}
+		});
 
 		Timeline gameLoop = new Timeline();
 		gameLoop.setCycleCount(Timeline.INDEFINITE);
 
 		KeyFrame kf = new KeyFrame(Duration.seconds(10), (ActionEvent ae) -> {
-				if (isRunning) {
-					JSONObject result = getResult();
-					int buildNumber = getBuildNumber(result);
-					if (currentBuildNumber != buildNumber && currentBuildNumber != 0) {
-						switch (getLastBuildResult(result)) {
-						case JENKINS_SUCCESS:
-							sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
-									Notifications.SUCCESS);
-							break;
-						case JENKINS_FAILURE:
-							sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
-									Notifications.ERROR);
-							break;
-						default:
-							sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
-									Notifications.INFORMATION);
-							break;
-						}
-						currentBuildNumber = buildNumber;
-						statusText.setMessage("Current build found " + currentBuildNumber);
-					} else {
-						statusText.appendWait();
+			if (isRunning) {
+				JSONObject result = getResult();
+				int buildNumber = getBuildNumber(result);
+				if (currentBuildNumber != buildNumber && currentBuildNumber != 0) {
+					switch (getLastBuildResult(result)) {
+					case JENKINS_SUCCESS:
+						sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
+								Notifications.SUCCESS);
+						break;
+					case JENKINS_FAILURE:
+						sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
+								Notifications.ERROR);
+						break;
+					default:
+						sendNotification(NEW_BUILD_MESSAGE + " " + buildNumber, textField_url.getText(),
+								Notifications.INFORMATION);
+						break;
 					}
+					currentBuildNumber = buildNumber;
+					statusText.setMessage("Current build found " + currentBuildNumber);
+				} else {
+					statusText.appendWait();
 				}
-			});
+			}
+		});
 
 		gameLoop.getKeyFrames().add(kf);
 		gameLoop.play();
@@ -153,7 +153,10 @@ public class Gui extends Application {
 		theStage.setScene(new Scene(borderPane));
 		theStage.setTitle("jenkins-notifier");
 
-		theStage.setOnCloseRequest((WindowEvent t) -> {Platform.exit(); System.exit(0);});
+		theStage.setOnCloseRequest((WindowEvent t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
 		theStage.show();
 	}
 

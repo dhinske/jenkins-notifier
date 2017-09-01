@@ -1,5 +1,7 @@
 package de.dave.notifier;
 
+import java.util.Properties;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -67,10 +69,11 @@ public class Gui extends Application {
 
 		borderPane.setTop(grid);
 		statusText = new StatusText("Welcome to jenkins-notifier");
-		textField_url = new TextField("");
+		Properties properties = PropertiesManager.getProperties();
+		textField_url = new TextField(properties.getProperty(PropertiesManager.URL));
 		textField_url.setMinWidth(300);
-		textField_username = new TextField("");
-		textField_token = new TextField("");
+		textField_username = new TextField(properties.getProperty(PropertiesManager.USERNAME));
+		textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
 		startButton = new Button(BUTTON_START);
 		startButton.setMinWidth(50);
 		startButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -81,6 +84,8 @@ public class Gui extends Application {
 					url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
 					userName = textField_username.getText();
 					token = textField_token.getText();
+					
+					PropertiesManager.writeProperties(url, userName, token);
 
 					textField_url.setEditable(false);
 					textField_username.setEditable(false);

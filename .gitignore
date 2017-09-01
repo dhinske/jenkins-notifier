@@ -6,6 +6,10 @@
 .classpath
 .settings/
 
+# Testing stuff
+properties.txt
+
+
 # Log file
 *.log
 

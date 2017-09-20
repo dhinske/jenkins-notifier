@@ -33,15 +33,19 @@ public class Gui extends Application {
 
 	private static final String NEW_BUILD_MESSAGE = "New build has finished";
 
-	private static final String JSON_BUILDS = "builds";
 	private static final String JSON_NUMBER = "number";
 	private static final String JENKINS_SUCCESS = "SUCCESS";
 	private static final String JENKINS_FAILURE = "FAILURE";
 	private static final String HTTP_PREFIX = "http://";
 
 	private static final String BUTTON_START = "Start";
+	private static final String BUTTON_STOP = "Stop";
 
 	private StatusText statusText;
+	private TextField textField_url;
+	private TextField textField_username;
+	private TextField textField_token;
+	private Button startButton;
 
 	private String url;
 	private String userName;
@@ -65,38 +69,24 @@ public class Gui extends Application {
 		borderPane.setTop(grid);
 		statusText = new StatusText("Welcome to jenkins-notifier");
 		Properties properties = PropertiesManager.getProperties();
-		TextField textField_url = new TextField(properties.getProperty(PropertiesManager.URL));
+		textField_url = new TextField(properties.getProperty(PropertiesManager.URL));
 		textField_url.setMinWidth(300);
-		TextField textField_username = new TextField(properties.getProperty(PropertiesManager.USERNAME));
-		TextField textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
-		Button startButton = new Button(BUTTON_START);
+		textField_username = new TextField(properties.getProperty(PropertiesManager.USERNAME));
+		textField_token = new TextField(properties.getProperty(PropertiesManager.TOKEN));
+		startButton = new Button(BUTTON_START);
 		startButton.setMinWidth(50);
 		startButton.setOnAction((ActionEvent e) -> {
 			isRunning = !isRunning;
-			if (isRunning) {
-				url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
-				userName = textField_username.getText();
-				token = textField_token.getText();
-
-				PropertiesManager.writeProperties(url, userName, token);
-
-				textField_url.setEditable(false);
-				textField_username.setEditable(false);
-				textField_token.setEditable(false);
-				startButton.setText("Stop");
-			} else {
-				textField_url.setEditable(true);
-				textField_username.setEditable(true);
-				textField_token.setEditable(true);
-				statusText.setMessage("jenkins-notifier stopped");
-				startButton.setText(BUTTON_START);
+			
+			if (!changeGui(isRunning, "jenkins-notifier stopped")) {
 				return;
 			}
 
 			JSONObject result = getResult();
 			if (result == null) {
 				isRunning = false;
-				startButton.setText(BUTTON_START);
+				changeGui(isRunning, "HTTP-Request cannot be executed, please check your values.");
+				return;
 			} else {
 				currentBuildNumber = getBuildNumber(result);
 				statusText.setMessage("Current build found " + currentBuildNumber);
@@ -158,6 +148,29 @@ public class Gui extends Application {
 		});
 		theStage.show();
 	}
+	
+	private boolean changeGui(boolean isRunning, String stopMessage) {
+		if (isRunning) {
+			url = textField_url.getText().replaceAll(HTTP_PREFIX, "");
+			userName = textField_username.getText();
+			token = textField_token.getText();
+
+			PropertiesManager.writeProperties(url, userName, token);
+			
+			textField_url.setEditable(false);
+			textField_username.setEditable(false);
+			textField_token.setEditable(false);
+			startButton.setText(BUTTON_STOP);
+			return true;
+		} else {
+			textField_url.setEditable(true);
+			textField_username.setEditable(true);
+			textField_token.setEditable(true);
+			statusText.setMessage(stopMessage);
+			startButton.setText(BUTTON_START);
+			return false;
+		}
+	}
 
 	private void sendNotification(String title, String message, Notification notification) {
 		TrayNotification tray = new TrayNotification();
@@ -169,14 +182,11 @@ public class Gui extends Application {
 	}
 
 	private int getBuildNumber(JSONObject job) {
-		if (!job.has(JSON_BUILDS) || job.getJSONArray(JSON_BUILDS).length() == 0) {
-			return 0;
-		}
-		return job.getJSONArray(JSON_BUILDS).getJSONObject(0).getInt(JSON_NUMBER);
+		return job.getJSONObject("lastCompletedBuild").getInt(JSON_NUMBER);
 	}
 
 	private String getLastBuildResult(JSONObject job) {
-		if (job.getJSONObject("lastSuccessfulBuild").getInt(JSON_NUMBER) == job.getJSONObject("lastBuild")
+		if (job.getJSONObject("lastCompletedBuild").getInt(JSON_NUMBER) == job.getJSONObject("lastBuild")
 				.getInt(JSON_NUMBER)) {
 			return JENKINS_SUCCESS;
 		}
